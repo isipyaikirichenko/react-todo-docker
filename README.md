@@ -1,70 +1,104 @@
-# Getting Started with Create React App
+# React ToDo в Docker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Простое React-приложение «Список задач» (ToDo), упакованное в Docker-образ с помощью многоступенчатой сборки: на первом этапе `node:alpine` собирает статику (`npm run build`), на втором `nginx:alpine` раздаёт готовые файлы.
 
-## Available Scripts
+Возможности приложения:
 
-In the project directory, you can run:
+- добавление новой задачи;
+- отметка задачи как выполненной;
+- фильтры «Все», «Активные», «Выполненные»;
+- удаление задачи и очистка выполненных;
+- сохранение списка в `localStorage` браузера.
 
-### `npm start`
+Лабораторная работа №3, МДК 08.01 «Проектирование и разработка интерфейсов пользователя». Исполнитель — Кириченко Я.И.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Скриншот
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Приложение, открытое в браузере после запуска контейнера (`http://localhost:8080`):
 
-### `npm test`
+![Скриншот приложения](docs/screenshot.png)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Структура проекта
 
-### `npm run build`
+```
+react-todo-docker/
+├── public/                  # статические файлы React (index.html, иконки)
+├── src/                     # исходный код приложения (App.js, App.css)
+├── docs/screenshot.png      # скриншот для README
+├── Dockerfile               # многоступенчатая сборка node:alpine -> nginx:alpine
+├── .dockerignore            # исключения из контекста сборки
+├── nginx.conf               # конфигурация nginx (SPA, gzip, кэширование)
+├── docker-compose.yml       # запуск через Docker Compose
+├── .env.example             # пример переменных окружения
+├── .github/workflows/       # GitHub Actions: сборка образа при пуше в main
+├── package.json
+└── README.md
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Требования
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- установленный [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / macOS) или Docker Engine (Linux);
+- для локального запуска без Docker — Node.js 18+.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Сборка Docker-образа
 
-### `npm run eject`
+```bash
+docker build -t react-todo-docker .
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Запуск контейнера
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+docker run -d -p 8080:80 --name react-todo react-todo-docker
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Здесь `8080` — порт на хосте (можно указать любой свободный), `80` — порт nginx внутри контейнера.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Адрес приложения
 
-## Learn More
+После запуска откройте в браузере: **http://localhost:8080**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Запуск через Docker Compose
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+docker-compose up -d
+```
 
-### Code Splitting
+(в новых версиях Docker — `docker compose up -d`). Остановка: `docker-compose down`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Переменные окружения
 
-### Analyzing the Bundle Size
+Заголовок приложения и порт можно изменить без правки кода.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+При сборке образа:
 
-### Making a Progressive Web App
+```bash
+docker build --build-arg REACT_APP_TITLE="Мои задачи" -t react-todo-docker .
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Через Docker Compose — скопируйте `.env.example` в `.env` и измените значения:
 
-### Advanced Configuration
+```
+APP_PORT=8080
+REACT_APP_TITLE=Список задач
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Остановка и удаление контейнера
 
-### Deployment
+```bash
+docker stop react-todo && docker rm react-todo
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Запуск в Windows одним кликом
 
-### `npm run build` fails to minify
+- `ЗАПУСК.bat` — собирает образ, запускает контейнер и открывает браузер;
+- `ОСТАНОВКА.bat` — останавливает и удаляет контейнер.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Локальный запуск без Docker
+
+```bash
+npm install
+npm start
+```
+
+Приложение будет доступно по адресу http://localhost:3000.
