@@ -1,0 +1,20 @@
+name: Docker build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Сборка Docker-образа
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: react-todo-docker:latest
