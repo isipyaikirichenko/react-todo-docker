@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        REACT_APP_TITLE: ${REACT_APP_TITLE:-Список задач}
+    image: react-todo-docker
+    container_name: react-todo
+    ports:
+      - "${APP_PORT:-8080}:80"
+    restart: unless-stopped
