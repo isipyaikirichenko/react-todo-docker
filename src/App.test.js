@@ -1,8 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('добавляет новую задачу', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Новая задача'), {
+    target: { value: 'Проверить тест' },
+  });
+  fireEvent.click(screen.getByText('Добавить'));
+  expect(screen.getByText('Проверить тест')).toBeInTheDocument();
 });
